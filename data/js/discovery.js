@@ -4,11 +4,12 @@ const base_delay = 250;
 
 function fetch_and_redirect() {
 	console.log("fetch");
-	const target_url = 'https://discovery.lixielabs.com/';
+	const target_url = 'https://app.emotiscope.rocks/discovery/';
 
-	fetch(target_url)
+	fetch(target_url, { redirect: 'follow' })
 		.then(response => {
 			if (!response.ok) {
+				print("BAD RESPONSE");
 				output("Network response was not ok");
 				throw new Error('Network response was not ok');
 			}
@@ -49,4 +50,7 @@ function fetch_and_redirect() {
 		});
 }
 
-fetch_and_redirect();
+// If page is fully loaded, fetch and redirect
+document.addEventListener('DOMContentLoaded', (event) => {
+	fetch_and_redirect();
+});
