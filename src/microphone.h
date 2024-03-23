@@ -14,9 +14,9 @@
 #include "driver/gpio.h"
 
 // Define I2S pins
-#define I2S_LRCLK_PIN 35
-#define I2S_BCLK_PIN  36
-#define I2S_DIN_PIN   37
+#define I2S_BCLK_PIN 5
+#define I2S_LRCLK_PIN 17
+#define I2S_DIN_PIN 16
 
 #define CHUNK_SIZE 64
 #define SAMPLE_RATE 12800
@@ -31,7 +31,8 @@ volatile bool waveform_sync_flag = false;
 
 i2s_chan_handle_t rx_handle;
 
-void init_i2s_microphone(){
+void init_i2s_microphone()
+{
 	// Get the default channel configuration
 	i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_AUTO, I2S_ROLE_MASTER);
 
@@ -44,14 +45,14 @@ void init_i2s_microphone(){
 		.slot_cfg = {
 			.data_bit_width = I2S_DATA_BIT_WIDTH_32BIT, // Data bit width as 24 bits
 			.slot_bit_width = I2S_SLOT_BIT_WIDTH_32BIT, // Slot width as 32 bits to accommodate data
-			.slot_mode = I2S_SLOT_MODE_STEREO, // Mono mode since it's a single microphone
-			.slot_mask = I2S_STD_SLOT_RIGHT, // Only reading the left channel slot
-			.ws_width = 32, // WS signal width as 32 BCLK periods (since BCLK/64 and we are in mono mode)
-			.ws_pol = true, // Inverting WS polarity, so it changes on falling edge of BCLK
-			.bit_shift = false, // No bit shift needed as MSB is delayed by 1 BCLK after WS
-			.left_align = true, // Data is left-aligned within the 32-bit slot
-			.big_endian = false, // Data format is little endian
-			.bit_order_lsb = false, // MSB is received first
+			.slot_mode = I2S_SLOT_MODE_STEREO,			// Mono mode since it's a single microphone
+			.slot_mask = I2S_STD_SLOT_RIGHT,			// Only reading the left channel slot
+			.ws_width = 32,								// WS signal width as 32 BCLK periods (since BCLK/64 and we are in mono mode)
+			.ws_pol = true,								// Inverting WS polarity, so it changes on falling edge of BCLK
+			.bit_shift = false,							// No bit shift needed as MSB is delayed by 1 BCLK after WS
+			.left_align = true,							// Data is left-aligned within the 32-bit slot
+			.big_endian = false,						// Data format is little endian
+			.bit_order_lsb = false,						// MSB is received first
 		},
 		.gpio_cfg = {
 			.mclk = I2S_GPIO_UNUSED,
@@ -67,8 +68,6 @@ void init_i2s_microphone(){
 		},
 	};
 
-
-
 	// Initialize the channel
 	i2s_channel_init_std_mode(rx_handle, &std_cfg);
 
@@ -76,8 +75,10 @@ void init_i2s_microphone(){
 	i2s_channel_enable(rx_handle);
 }
 
-void acquire_sample_chunk() {
-	profile_function([&]() {
+void acquire_sample_chunk()
+{
+	profile_function([&]()
+					 {
 		// Buffer to hold audio samples
 		uint32_t new_samples_raw[CHUNK_SIZE];
 		float new_samples[CHUNK_SIZE];
@@ -124,6 +125,6 @@ void acquire_sample_chunk() {
 		
 		// Used to sync GPU to this when needed
 		waveform_locked = false;
-		waveform_sync_flag = true;
-	}, __func__);
+		waveform_sync_flag = true; },
+					 __func__);
 }

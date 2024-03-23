@@ -3,8 +3,8 @@
 #include <esp_check.h>
 #include <esp_log.h>
 
-#define LED_DATA_1_PIN ( 21 )
-#define LED_DATA_2_PIN ( 17 )
+#define LED_DATA_1_PIN ( 12 )
+// #define LED_DATA_2_PIN ( 14 )
 
 // It won't void any kind of stupid warranty, but things will *definitely* break at this point if you change this number.
 #define NUM_LEDS ( 128 )
