@@ -88,13 +88,16 @@ void acquire_sample_chunk()
 			size_t bytes_read = 0;
 			i2s_channel_read(rx_handle, new_samples_raw, CHUNK_SIZE*sizeof(uint32_t), &bytes_read, portMAX_DELAY);
 		}
+		else{
+			memset(new_samples_raw, 0, sizeof(uint32_t) * CHUNK_SIZE);
+		}
 
 		// Clip the sample value if it's too large, cast to floats
 		for (uint16_t i = 0; i < CHUNK_SIZE; i+=4) {
-			new_samples[i+0] = min(max((((int32_t)new_samples_raw[i+0]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
-			new_samples[i+1] = min(max((((int32_t)new_samples_raw[i+1]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
-			new_samples[i+2] = min(max((((int32_t)new_samples_raw[i+2]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
-			new_samples[i+3] = min(max((((int32_t)new_samples_raw[i+3]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072);
+			new_samples[i+0] = min(max((((int32_t)new_samples_raw[i+0]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072) - 360;
+			new_samples[i+1] = min(max((((int32_t)new_samples_raw[i+1]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072) - 360;
+			new_samples[i+2] = min(max((((int32_t)new_samples_raw[i+2]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072) - 360;
+			new_samples[i+3] = min(max((((int32_t)new_samples_raw[i+3]) >> 14) + 7000, (int32_t)-131072), (int32_t)131072) - 360;
 		}
 
 		// Convert audio from "18-bit" float range to -1.0 to 1.0 range

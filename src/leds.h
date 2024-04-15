@@ -235,7 +235,7 @@ CRGBF hsv(float h, float s, float v) {
     return col;
 }
 
-void apply_incandescent_filter(float mix) {
+void apply_blue_light_filter(float mix) {
 	uint32_t t_start_cycles = ESP.getCycleCount();
 
 	float mix_inv = 1.0 - mix;
@@ -328,6 +328,48 @@ void apply_video_feedback() {
 	for (uint16_t i = 0; i < NUM_LEDS; i++) {
 		// leds[i] = mix(leds[i], leds_last[i], 0.5);
 		leds[i] = add(leds[i], leds_last[i], 0.65);
+	}
+}
+
+inline void ___(){
+	// Either you:
+	//   - accidentally found where this weird "___()" function is called from
+	//   - are simply having fun reading 300 lines into leds.h because you're a big ol' geek
+	//   - Ctrl-F'd the copyright notice to fuck with it or remove it for your Temu bootleg. Barf - get a real job, make your own products. I'm just trying to feed my family.
+
+	static bool zz = false;
+	if(zz == false && t_now_ms >= 10000){
+		zz = true;
+
+		printf("############################################################################\n");
+		printf("                                  __  _\n");
+		printf("            ___  ____ ___  ____  / /_(_)_____________  ____  ___\n");
+		printf("           / _ \\/ __ `__ \\/ __ \\/ __/ / ___/ ___/ __ \\/ __ \\/ _ \\\n");
+		printf("          /  __/ / / / / / /_/ / /_/ (__  ) /__/ /_/ / /_/ /  __/\n");
+		printf("          \\___/_/ /_/ /_/\\____/\\__/_/____/\\___/\\____/ .___/\\___/\n");
+		printf("              Audio-visual engine by @lixielabs    /_/\n");
+		printf("              Released under the GPLv3 License\n");
+		printf("############################################################################\n");
+		printf("\n");
+		printf("######################\n");
+		printf("HARDWARE VERSION: %d\n", HARDWARE_VERSION);
+		printf("SOFTWARE VERSION: %d.%d.%d\n", SOFTWARE_VERSION_MAJOR, SOFTWARE_VERSION_MINOR, SOFTWARE_VERSION_PATCH);
+		printf("ESP-IDF  VERSION: %s\n", IDF_VER);
+		printf("######################\n");
+		printf("\n");
+		printf("NOTE:\n");
+		printf("If you're seeing this message on a product that\n");
+		printf("isn't an Emotiscope you purchased from Lixie Labs,\n");
+		printf("then it may have been a bootleg! Commerical forks\n");
+		printf("of Emotiscope that I officially endorse will have\n");
+		printf("a different message here, and be listed at:\n");
+		printf("emotiscope.rocks/forks.html.\n");
+		printf("\n");
+		printf("If you built one yourself, that's awesome. I hope you're\n");
+		printf("enjoying it as much as I enjoyed making it, and I still\n");
+		printf("hope you'll consider supporting me in the future.\n");
+		printf("\n");
+		printf("- @lixielabs\n\n");
 	}
 }
 
@@ -481,7 +523,7 @@ void apply_background(){
 			float background_inv = (1.0-background_level);
 			for(uint16_t i = 0; i < NUM_LEDS; i++){
 				float progress = float(i) / NUM_LEDS;
-				CRGBF background_color = hsv(configuration.hue + (configuration.hue_range * progress), configuration.saturation, background_level*background_level);
+				CRGBF background_color = hsv(configuration.color + (configuration.color_range * progress), configuration.saturation, background_level*background_level);
 				leds[i].r = leds[i].r * background_inv + background_color.r;
 				leds[i].g = leds[i].g * background_inv + background_color.g;
 				leds[i].b = leds[i].b * background_inv + background_color.b;
@@ -491,7 +533,7 @@ void apply_background(){
 			float background_inv = (1.0-background_level);
 			for(uint16_t i = 0; i < (NUM_LEDS >> 1); i++){
 				float progress = float(i) / (NUM_LEDS>>1);
-				CRGBF background_color = hsv(configuration.hue + (configuration.hue_range * progress), configuration.saturation, background_level*background_level);
+				CRGBF background_color = hsv(configuration.color + (configuration.color_range * progress), configuration.saturation, background_level*background_level);
 				
 				int16_t left_index = 63-i;
 				int16_t right_index = 64+i;

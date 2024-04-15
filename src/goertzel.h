@@ -221,8 +221,8 @@ float collect_and_filter_noise(float input_magnitude, uint16_t bin) {
 		return output_magnitude;
 	}
 	else {
-		if (input_magnitude*1.1 > noise_spectrum[bin]) {
-			noise_spectrum[bin] = input_magnitude*1.1;
+		if (input_magnitude > noise_spectrum[bin]) {
+			noise_spectrum[bin] = input_magnitude*0.75;
 		}
 
 		return input_magnitude;
@@ -286,7 +286,9 @@ void calculate_magnitudes() {
 			if(noise_calibration_active_frames_remaining == 0){
 				// Let the UI know
 				broadcast("noise_cal_ready");
-				save_config_delayed();
+				save_config();
+				save_noise_spectrum();
+				
 			}
 		}
 
@@ -332,11 +334,13 @@ void calculate_magnitudes() {
 
 		magnitudes_locked = false;
 	}, __func__ );
+	___();
 }
 
 void start_noise_calibration() {
 	Serial.println("Starting noise cal...");
 	memset(noise_spectrum, 0, sizeof(float) * NUM_FREQS);
+	configuration.vu_floor = 0.0;
 	noise_calibration_active_frames_remaining = NOISE_CALIBRATION_FRAMES;
 }
 

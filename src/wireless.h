@@ -10,6 +10,9 @@ const IPAddress ap_gateway(192, 168, 4, 1); // Gateway IP address, same as ESP32
 const IPAddress ap_subnet(255, 255, 255, 0); // Subnet mask for the WiFi network
 DNSServer dns_server; // DNS server instance
 
+// Define a char array to hold the formatted MAC address string
+char mac_str[18]; // MAC address string format "XX:XX:XX:XX:XX:XX" + '\0'
+
 // HTTPS not working yet, PsychicHTTP can't initialize the SSL server
 bool app_enable_ssl = true;
 const char server_cert[] = "-----BEGIN CERTIFICATE-----\n"
@@ -53,15 +56,8 @@ int16_t connection_status = -1;
 
 uint8_t network_connection_attempts = 0;
 
-void reboot_into_wifi_config_mode(){
-    File file = LittleFS.open("/WIFI_CONFIG_MODE_TRIGGER", "w");
-    if (!file) {
-        printf("Failed to open WIFI_CONFIG_MODE_TRIGGER for writing\n");
-        return;
-    }
-    file.print("NULL");
-    file.close();
-
+void reboot_into_wifi_config_mode() {
+	preferences.putBool("CONFIG_TRIG", true);
 	delay(100);
 	ESP.restart();
 }
@@ -270,6 +266,10 @@ void init_web_server() {
 		}
 	});
 
+	server.on("/mac", HTTP_GET, [](PsychicRequest *request) {
+   		return request->reply(mac_str);
+	});
+
 	server.on("/*", HTTP_GET, [](PsychicRequest *request) {
 		esp_err_t result = ESP_OK;
 		String path = "";
@@ -352,6 +352,21 @@ void init_web_server() {
 }
 
 void init_wifi() {
+	// Define a variable to hold the MAC address
+	uint8_t mac_address[6]; // MAC address is 6 bytes
+
+	// Retrieve the MAC address of the device
+	WiFi.macAddress(mac_address);
+	//esp_read_mac(mac_address, ESP_MAC_WIFI_STA); // Use ESP_MAC_WIFI_STA for station interface
+
+	// Format the MAC address into the char array
+	snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X",
+			mac_address[0], mac_address[1], mac_address[2],
+			mac_address[3], mac_address[4], mac_address[5]);
+
+	// Print the MAC address string
+	printf("MAC Address: %s\n", mac_str);
+
 	if(wifi_config_mode == true){
 		WiFi.softAP("Emotiscope Setup");
 		dns_server.start(53, "*", WiFi.softAPIP());
@@ -367,24 +382,6 @@ void init_wifi() {
 		WiFi.begin(wifi_ssid, wifi_pass);  // Start the WiFi connection with the
 										// SSID and password parsed in configuration.h
 		printf("Started connection attempt to %s...\n", wifi_ssid);
-
-		// Define a variable to hold the MAC address
-		uint8_t mac_address[6]; // MAC address is 6 bytes
-
-		// Retrieve the MAC address of the device
-		WiFi.macAddress(mac_address);
-		//esp_read_mac(mac_address, ESP_MAC_WIFI_STA); // Use ESP_MAC_WIFI_STA for station interface
-		
-		// Define a char array to hold the formatted MAC address string
-		char mac_str[18]; // MAC address string format "XX:XX:XX:XX:XX:XX" + '\0'
-
-		// Format the MAC address into the char array
-		snprintf(mac_str, sizeof(mac_str), "%02X:%02X:%02X:%02X:%02X:%02X",
-				mac_address[0], mac_address[1], mac_address[2],
-				mac_address[3], mac_address[4], mac_address[5]);
-
-		// Print the MAC address string
-		printf("MAC Address: %s\n", mac_str);
 
 		// TODO: Fetch and print the MAC address in the app and wifi setup page
 	}
@@ -460,6 +457,9 @@ void handle_wifi() {
 			if(network_connection_attempts >= 3){
 				reboot_into_wifi_config_mode();
 			}
+		}
+		else{
+			//printf("WIFI CONFIG MODE ACTIVE, NOT RECONNECTING\n");
 		}
 	}
 

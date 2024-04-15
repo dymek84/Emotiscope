@@ -99,15 +99,15 @@ void draw_metronome() {
 		float metronome_width = 0.5; // Too wide of a show can be distracting, 50% is enough for the effect
 		float dot_pos = clip_float( sine * (0.5*(sqrt(contribution)) * metronome_width) + 0.5 );
 
-		float opacity = ((contribution));
+		float opacity = (sqrt(contribution));
 
-		float hue_offset = 0.0;
+		float color_offset = 0.0;
 		if(tempo_bin % 2 == 0){
-			hue_offset = 0.25;
+			color_offset = 0.25;
 		}
 
-		if(contribution > 0.001){
-			CRGBF dot_color = hsv((configuration.hue+hue_offset*configuration.hue_range) + configuration.hue_range*progress, configuration.saturation, 1.0);
+		if(opacity > 0.0001){
+			CRGBF dot_color = hsv((configuration.color+color_offset*configuration.color_range) + configuration.color_range*progress, configuration.saturation, 1.0);
 
 			if(configuration.mirror_mode == true){
 				dot_pos -= 0.25;
@@ -118,7 +118,6 @@ void draw_metronome() {
 			if(configuration.mirror_mode == true){
 				draw_dot(leds, NUM_RESERVED_DOTS + tempo_bin * 2 + 1, dot_color, 1.0 - dot_pos, opacity);
 			}
-			//}
 		}
 	}
 }
